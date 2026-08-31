@@ -6,6 +6,12 @@ Creates candidate census Enumeration Areas (EAs) by grouping building points acc
 
 Candidate EAs are review proposals. The tool does not modify official EA boundaries or designate its output as an official geography.
 
+## Example output
+
+![Example candidate Enumeration Area output map showing residences, roads, and EA boundaries](Screenshot%202026-08-31%20131735.png)
+
+The annotated map shows residences as magenta symbols, candidate EA boundaries in yellow, minor roads in blue, and a major road in orange. The image demonstrates one possible ArcGIS Pro map presentation; the tool creates the output datasets but does not prescribe this symbology.
+
 ## Usage
 
 - The **Buildings** input must contain one point per building and a numeric dwelling-count field. Decimal dwelling values are rounded to the nearest integer. Null values are treated as zero; negative values are not valid.

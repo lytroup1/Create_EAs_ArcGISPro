@@ -8,6 +8,12 @@ The ArcGIS Pro Python toolbox reads building points, dwelling counts, administra
 
 The baseline treats each building as indivisible so all dwellings in a building remain with one enumerator. Administrative boundaries and hard barriers reject merges. Distance and shared-boundary values influence candidate selection. Every candidate outside the requested dwelling range receives a status or review note.
 
+## Example output map
+
+![Example candidate Enumeration Area output map showing residences, roads, and EA boundaries](docs/Screenshot%202026-08-31%20131735.png)
+
+This annotated example shows residences as magenta symbols, candidate EA boundaries in yellow, minor roads in blue, and a major road in orange. Symbology is illustrative and can be configured in ArcGIS Pro.
+
 ## ArcGIS Pro toolbox
 
 The final `.pyt` file is uploaded directly into ArcGIS Pro and runs inside the ArcGIS Pro Python environment. It will import the reusable logic from `src/preea`; there is no separate application connection or service. ArcPy is provided by ArcGIS Pro and is intentionally not listed as a pip dependency. Polygon partitioning requires the ArcGIS Spatial Analyst extension.
