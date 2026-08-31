@@ -1,0 +1,2 @@
+# Milestone 1 uses only the Python standard library.
+# ArcPy is supplied by the ArcGIS Pro Python environment and is not installed here.

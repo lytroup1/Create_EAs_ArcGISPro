@@ -1,0 +1,11 @@
+{
+  "minimum_dwellings": 80,
+  "target_dwellings": 100,
+  "maximum_dwellings": 120,
+  "dwelling_balance_weight": 0.5,
+  "building_balance_weight": 0.25,
+  "distance_weight": 0.25,
+  "initial_clustering_distance_m": 100.0,
+  "maximum_ea_area_sq_km": null,
+  "random_seed": 0
+}

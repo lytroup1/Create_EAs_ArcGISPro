@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xml:lang="en">
+	<Esri>
+		<CreaDate>20260825</CreaDate>
+		<CreaTime>11145200</CreaTime>
+		<ArcGISFormat>1.0</ArcGISFormat>
+		<SyncOnce>TRUE</SyncOnce>
+		<ModDate>20260827</ModDate>
+	</Esri>
+	<tool name="CreateCandidateEAs" displayname="Create Candidate EAs">
+		<summary>Create complete, non-overlapping candidate enumeration areas from building points and dwelling counts.</summary>
+		<usage>The tool groups nearby buildings within each administrative unit, balances candidate workloads, and creates a complete polygon partition. Roads influence where polygon boundaries fall but do not act as absolute barriers. Outputs are review proposals and should be checked before operational use. Spatial Analyst is required for polygon allocation.</usage>
+		<parameters>
+			<param name="administrative_boundary" displayname="Administrative Boundary" type="Required" direction="Input" datatype="Feature Layer">
+				<dialogReference>Polygon features defining the study area and the administrative units within which candidate EAs will be created. Every administrative unit must contain at least one building.</dialogReference>
+				<pythonReference>Polygon features defining the study area and administrative units.</pythonReference>
+			</param>
+			<param name="administrative_id_field" displayname="Administrative ID Field" type="Required" direction="Input" datatype="Field">
+				<dialogReference>A field containing a unique, nonempty identifier for each administrative unit.</dialogReference>
+				<pythonReference>The unique administrative-unit identifier field.</pythonReference>
+			</param>
+			<param name="buildings" displayname="Buildings" type="Required" direction="Input" datatype="Feature Layer">
+				<dialogReference>Point features representing buildings to assign to candidate EAs. Use a projected coordinate system with linear units.</dialogReference>
+				<pythonReference>Building point features to assign to candidate EAs.</pythonReference>
+			</param>
+			<param name="dwelling_count_field" displayname="Dwelling Count Field" type="Required" direction="Input" datatype="Field">
+				<dialogReference>A numeric field containing the estimated number of dwellings at each building point.</dialogReference>
+				<pythonReference>The numeric dwelling-count field on the building points.</pythonReference>
+			</param>
+			<param name="roads" displayname="Roads" type="Optional" direction="Input" datatype="Feature Layer">
+				<dialogReference>Optional road lines used to encourage candidate EA boundaries to follow the road network. Roads influence allocation cost but can be crossed when needed to form a complete partition.</dialogReference>
+				<pythonReference>Optional road lines used as weighted boundary influences.</pythonReference>
+			</param>
+			<param name="road_classification_field" displayname="Road Classification Field" type="Optional" direction="Input" datatype="Field">
+				<dialogReference>Optional road class field used to assign stronger influence to major roads than minor roads. When omitted, all roads receive the default minor-road cost.</dialogReference>
+				<pythonReference>An optional road classification field.</pythonReference>
+			</param>
+			<param name="rivers" displayname="Rivers" type="Optional" direction="Input" datatype="Feature Layer">
+				<dialogReference>Optional river lines used when evaluating whether candidate building connections cross a barrier.</dialogReference>
+				<pythonReference>Optional river lines used as grouping barriers.</pythonReference>
+			</param>
+			<param name="minimum_dwellings" displayname="Minimum Dwellings per EA" type="Required" direction="Input" datatype="Long">
+				<dialogReference>The preferred minimum dwelling workload for a candidate EA. Candidates below this value are flagged for review.</dialogReference>
+				<pythonReference>The preferred minimum dwelling count per candidate EA.</pythonReference>
+			</param>
+			<param name="target_dwellings" displayname="Target Dwellings per EA" type="Required" direction="Input" datatype="Long">
+				<dialogReference>The desired dwelling workload used to score and balance candidate EAs.</dialogReference>
+				<pythonReference>The target dwelling count per candidate EA.</pythonReference>
+			</param>
+			<param name="maximum_dwellings" displayname="Maximum Dwellings per EA" type="Required" direction="Input" datatype="Long">
+				<dialogReference>The preferred maximum dwelling workload for a candidate EA. Candidates above this value are flagged for review.</dialogReference>
+				<pythonReference>The preferred maximum dwelling count per candidate EA.</pythonReference>
+			</param>
+			<param name="clustering_distance" displayname="Initial Building Clustering Distance" type="Required" direction="Input" datatype="Double">
+				<dialogReference>The maximum search distance, in meters, used to connect each building to nearby neighbors during initial grouping. Larger values allow more distant buildings to join but may increase processing time.</dialogReference>
+				<pythonReference>The building-neighbor search distance in meters.</pythonReference>
+			</param>
+			<param name="boundary_cell_size" displayname="Boundary Alignment Resolution (Meters)" type="Required" direction="Input" datatype="Double">
+				<dialogReference>The preferred raster cell size used to create road-influenced EA boundaries. The default 5 meters provides close road alignment. Smaller values can improve detail but substantially increase runtime and temporary storage; the tool may automatically use a smaller cell size to separate conflicting source assignments.</dialogReference>
+				<pythonReference>The preferred boundary-allocation cell size in meters.</pythonReference>
+			</param>
+			<param name="dwelling_weight" displayname="Dwelling Balance Weight" type="Required" direction="Input" datatype="Double">
+				<dialogReference>The relative importance of matching the target dwelling count when scoring possible candidate merges.</dialogReference>
+				<pythonReference>The nonnegative dwelling-balance scoring weight.</pythonReference>
+			</param>
+			<param name="building_weight" displayname="Building Balance Weight" type="Required" direction="Input" datatype="Double">
+				<dialogReference>The relative importance of balancing the number of buildings when scoring possible candidate merges.</dialogReference>
+				<pythonReference>The nonnegative building-balance scoring weight.</pythonReference>
+			</param>
+			<param name="distance_weight" displayname="Distance Weight" type="Required" direction="Input" datatype="Double">
+				<dialogReference>The relative importance of short connections between buildings when scoring possible candidate merges.</dialogReference>
+				<pythonReference>The nonnegative distance scoring weight.</pythonReference>
+			</param>
+			<param name="output_gdb" displayname="Output Geodatabase" type="Required" direction="Input" datatype="Workspace">
+				<dialogReference>An existing file geodatabase where the candidate polygons, building assignments, and summary table will be written.</dialogReference>
+				<pythonReference>The existing output file geodatabase.</pythonReference>
+			</param>
+			<param name="output_prefix" displayname="Output Name Prefix" type="Required" direction="Input" datatype="String">
+				<dialogReference>The prefix used to name all output datasets. Existing datasets with the resulting names are deleted and replaced. Input datasets are protected from output-name collisions.</dialogReference>
+				<pythonReference>The output dataset name prefix.</pythonReference>
+			</param>
+			<param name="diagnostic_file" displayname="Diagnostic Markdown File" type="Optional" direction="Output" datatype="File">
+				<dialogReference>An optional Markdown report containing run counts, threshold results, and output locations.</dialogReference>
+				<pythonReference>An optional output Markdown report path.</pythonReference>
+			</param>
+			<param name="candidate_eas" displayname="Candidate EA Polygons" type="Derived" direction="Output" datatype="Feature Class">
+				<dialogReference>The complete, non-overlapping candidate EA polygon partition.</dialogReference>
+				<pythonReference>The derived candidate EA polygon feature class.</pythonReference>
+			</param>
+			<param name="building_assignments" displayname="Building Assignments" type="Derived" direction="Output" datatype="Feature Class">
+				<dialogReference>A copy of the building points with candidate EA identifiers and dwelling counts.</dialogReference>
+				<pythonReference>The derived building-assignment feature class.</pythonReference>
+			</param>
+			<param name="ea_summary" displayname="EA Summary" type="Derived" direction="Output" datatype="Table">
+				<dialogReference>A table summarizing building counts, dwelling counts, threshold status, and review notes for each candidate EA.</dialogReference>
+				<pythonReference>The derived candidate EA summary table.</pythonReference>
+			</param>
+		</parameters>
+	</tool>
+</metadata>
