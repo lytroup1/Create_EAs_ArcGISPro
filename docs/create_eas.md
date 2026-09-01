@@ -1,4 +1,4 @@
-# Create Candidate EAs (PreEA)
+# Create EAs
 
 ## Summary
 
@@ -156,10 +156,10 @@ The tool must run in an ArcGIS Pro Python environment that provides ArcPy.
 
 ## Python syntax
 
-After importing the Python toolbox, call the tool through its `preea` alias:
+After importing the Python toolbox, call the tool through its `createeas` alias:
 
 ```python
-arcpy.preea.CreateCandidateEAs(
+arcpy.createeas.CreateEAs(
     administrative_boundary,
     administrative_id_field,
     buildings,
@@ -188,9 +188,9 @@ The following stand-alone example creates candidate EAs using roads and rivers:
 ```python
 import arcpy
 
-arcpy.ImportToolbox(r"C:\PreEA\toolbox\preea.pyt", "preea")
+arcpy.ImportToolbox(r"C:\CreateEAs\toolbox\create_eas.pyt", "createeas")
 
-result = arcpy.preea.CreateCandidateEAs(
+result = arcpy.createeas.CreateEAs(
     r"C:\Data\Census.gdb\AdministrativeAreas",
     "AdminID",
     r"C:\Data\Census.gdb\Buildings",

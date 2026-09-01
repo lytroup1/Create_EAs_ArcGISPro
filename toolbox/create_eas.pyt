@@ -15,20 +15,20 @@ if _SRC not in sys.path:
 
 class Toolbox:
     def __init__(self):
-        self.label = "PreEA"
-        self.alias = "preea"
-        self.tools = [CreateCandidateEAs]
+        self.label = "Create EAs"
+        self.alias = "createeas"
+        self.tools = [CreateEAs]
 
 
-class CreateCandidateEAs:
+class CreateEAs:
     def __init__(self):
-        self.label = "Create Candidate EAs"
+        self.label = "Create EAs"
         self.description = (
             "Create complete, non-overlapping candidate enumeration areas from building points "
             "and dwelling counts. Roads influence where boundaries fall, and all results remain "
             "review proposals rather than final enumeration areas."
         )
-        self.category = "PreEA"
+        self.category = "Create EAs"
         self.canRunInBackground = False
 
     def getParameterInfo(self):
@@ -170,9 +170,9 @@ class CreateCandidateEAs:
         parameter_by_name = _parameters_by_name(parameters)
         _ensure_core_package()
         importlib.invalidate_caches()
-        workflow = importlib.import_module("preea.arcpy_workflow")
+        workflow = importlib.import_module("create_eas.arcpy_workflow")
         workflow = importlib.reload(workflow)
-        arcpy.AddMessage(f"Loaded PreEA workflow revision {workflow.WORKFLOW_REVISION}.")
+        arcpy.AddMessage(f"Loaded Create EAs workflow revision {workflow.WORKFLOW_REVISION}.")
 
         _validate_feature_inputs(
             parameter_by_name["administrative_boundary"].valueAsText,
@@ -280,25 +280,26 @@ def _parameter_index(parameters, name):
 
 
 def _ensure_core_package():
-    package_path = os.path.join(_SRC, "preea")
+    package_path = os.path.join(_SRC, "create_eas")
     init_path = os.path.join(package_path, "__init__.py")
     if not os.path.isfile(init_path):
         raise RuntimeError(
-            "The PreEA core package was not found. Keep the toolbox folder and src\\preea folder together. "
+            "The Create EAs core package was not found. Keep the toolbox folder and "
+            "src\\create_eas folder together. "
             f"Expected: {package_path}"
         )
-    package = sys.modules.get("preea")
+    package = sys.modules.get("create_eas")
     if package is not None:
         return
     spec = importlib.util.spec_from_file_location(
-        "preea",
+        "create_eas",
         init_path,
         submodule_search_locations=[package_path],
     )
     if spec is None or spec.loader is None:
-        raise RuntimeError(f"Unable to load the PreEA core package from {package_path}.")
+        raise RuntimeError(f"Unable to load the Create EAs core package from {package_path}.")
     package = importlib.util.module_from_spec(spec)
-    sys.modules["preea"] = package
+    sys.modules["create_eas"] = package
     spec.loader.exec_module(package)
 
 

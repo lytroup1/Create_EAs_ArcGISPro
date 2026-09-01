@@ -1,4 +1,4 @@
-"""ArcPy execution workflow for the Create Candidate EAs tool."""
+"""ArcPy execution workflow for the Create EAs tool."""
 
 from collections import defaultdict
 from datetime import datetime
@@ -95,7 +95,7 @@ def run_candidate_eas(
 
         log.message("Building a proximity graph...")
         stage_started = perf_counter()
-        near_table = os.path.join(scratch, f"preEA_near_{run_id}")
+        near_table = os.path.join(scratch, f"createEAs_near_{run_id}")
         distance_method = (
             "GEODESIC"
             if arcpy.Describe(joined).spatialReference.type == "Geographic"
@@ -195,10 +195,10 @@ def run_candidate_eas(
 
 
 def _prepare_buildings(buildings, scratch, run_id):
-    output = os.path.join(scratch, f"preEA_source_{run_id}")
+    output = os.path.join(scratch, f"createEAs_source_{run_id}")
     arcpy.management.CopyFeatures(buildings, output)
-    arcpy.management.AddField(output, "PreEAOID", "LONG")
-    with arcpy.da.UpdateCursor(output, ["OID@", "PreEAOID"]) as cursor:
+    arcpy.management.AddField(output, "CreateEAsOID", "LONG")
+    with arcpy.da.UpdateCursor(output, ["OID@", "CreateEAsOID"]) as cursor:
         for row in cursor:
             row[1] = row[0]
             cursor.updateRow(row)
@@ -206,7 +206,7 @@ def _prepare_buildings(buildings, scratch, run_id):
 
 
 def _spatially_assign_admins(buildings, administrative_boundary, scratch, run_id):
-    output = os.path.join(scratch, f"preEA_admin_{run_id}")
+    output = os.path.join(scratch, f"createEAs_admin_{run_id}")
     arcpy.analysis.SpatialJoin(
         buildings,
         administrative_boundary,
@@ -247,7 +247,7 @@ def _read_buildings(joined, dwelling_field, administrative_id_field):
         raise ValueError(f"Administrative ID field '{administrative_id_field}' was not preserved by Spatial Join.")
     join_count = fields.get("join_count")
     target_fid = fields.get("target_fid")
-    source_id = fields.get("preeaoid")
+    source_id = fields.get("createeasoid")
     records = []
     oid_map = {}
     cursor_fields = ["OID@", "SHAPE@XY", dwelling_name, admin_name]
@@ -295,7 +295,7 @@ def _read_edges(near_table, oid_map, roads, road_classification_field, rivers, s
             key = tuple(sorted((from_oid, to_oid)))
             if key not in pairs or distance < pairs[key]:
                 pairs[key] = distance
-    edge_fc = os.path.join(scratch, f"preEA_edges_{run_id}")
+    edge_fc = os.path.join(scratch, f"createEAs_edges_{run_id}")
     arcpy.management.CreateFeatureclass(scratch, os.path.basename(edge_fc), "POLYLINE", spatial_reference=spatial_reference)
     arcpy.management.AddField(edge_fc, "EDGE_KEY", "TEXT", field_length=64)
     arcpy.management.AddField(edge_fc, "DIST_M", "DOUBLE")
@@ -439,7 +439,7 @@ def _write_outputs(output_gdb, prefix, administrative_boundary, administrative_i
     building_by_id = {record.building_id: record for record in building_records}
     ea_value_by_id = {candidate.ea_id: index for index, candidate in enumerate(candidates, 1)}
     arcpy.AddMessage("Writing building-to-EA membership...")
-    with arcpy.da.UpdateCursor(assignments, ["PreEAOID", "BuildingID", "EAID", "AdminID", "DwellingCount", "ReviewNotes", "EAValue"]) as cursor:
+    with arcpy.da.UpdateCursor(assignments, ["CreateEAsOID", "BuildingID", "EAID", "AdminID", "DwellingCount", "ReviewNotes", "EAValue"]) as cursor:
         for row in cursor:
             building_id = row[1] or f"B_{row[0]:09d}"
             record = building_by_id.get(building_id)
@@ -560,28 +560,28 @@ def _create_partition_geometries(assignments, candidates, ea_value_by_id, admin_
         arcpy.CheckOutExtension("Spatial")
     try:
         if roads:
-            road_cost_features = os.path.join(scratch, f"preEA_road_cost_{run_id}")
+            road_cost_features = os.path.join(scratch, f"createEAs_road_cost_{run_id}")
             arcpy.management.CopyFeatures(roads, road_cost_features)
             temporary_paths.append(road_cost_features)
-            arcpy.management.AddField(road_cost_features, "PreEACost", "LONG")
+            arcpy.management.AddField(road_cost_features, "CreateEAsCost", "LONG")
             fields = {field.name.lower(): field.name for field in arcpy.ListFields(road_cost_features)}
             class_name = fields.get((road_classification_field or "").lower())
-            cursor_fields = ["PreEACost"] + ([class_name] if class_name else [])
+            cursor_fields = ["CreateEAsCost"] + ([class_name] if class_name else [])
             with arcpy.da.UpdateCursor(road_cost_features, cursor_fields) as cursor:
                 for row in cursor:
                     row[0] = _boundary_road_cost(row[1] if class_name else None)
                     cursor.updateRow(row)
 
         value_to_ea = {value: ea_id for ea_id, value in ea_value_by_id.items()}
-        assignment_layer = f"preEA_assignment_layer_{run_id}"
+        assignment_layer = f"createEAs_assignment_layer_{run_id}"
         arcpy.management.MakeFeatureLayer(assignments, assignment_layer)
         for admin_index, (admin_id, admin_geometry) in enumerate(admin_geometries.items(), 1):
             admin_token = f"{run_id}_{admin_index}"
-            admin_fc = os.path.join(scratch, f"preEA_admin_clip_{admin_token}")
-            allocation_raster = os.path.join(scratch, f"preEA_allocation_{admin_token}")
-            source_raster = os.path.join(scratch, f"preEA_sources_{admin_token}")
-            allocation_polygons = os.path.join(scratch, f"preEA_zones_{admin_token}")
-            clipped_polygons = os.path.join(scratch, f"preEA_clipped_{admin_token}")
+            admin_fc = os.path.join(scratch, f"createEAs_admin_clip_{admin_token}")
+            allocation_raster = os.path.join(scratch, f"createEAs_allocation_{admin_token}")
+            source_raster = os.path.join(scratch, f"createEAs_sources_{admin_token}")
+            allocation_polygons = os.path.join(scratch, f"createEAs_zones_{admin_token}")
+            clipped_polygons = os.path.join(scratch, f"createEAs_clipped_{admin_token}")
             admin_temporaries = [admin_fc, source_raster, allocation_raster, allocation_polygons, clipped_polygons]
             temporary_paths.extend(admin_temporaries)
             arcpy.management.CopyFeatures([admin_geometry], admin_fc)
@@ -625,14 +625,14 @@ def _create_partition_geometries(assignments, candidates, ea_value_by_id, admin_
                         f"{source_zone_count:,} EA values; expected {expected_zone_count:,}."
                     )
                 if road_cost_features:
-                    road_raster = os.path.join(scratch, f"preEA_roads_{admin_token}")
+                    road_raster = os.path.join(scratch, f"createEAs_roads_{admin_token}")
                     temporary_paths.append(road_raster)
                     arcpy.conversion.PolylineToRaster(
                         road_cost_features,
-                        "PreEACost",
+                        "CreateEAsCost",
                         road_raster,
                         "MAXIMUM_LENGTH",
-                        "PreEACost",
+                        "CreateEAsCost",
                         cell_size,
                     )
                     cost_surface = arcpy.sa.Con(

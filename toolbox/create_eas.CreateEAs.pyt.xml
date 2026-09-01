@@ -7,7 +7,7 @@
 		<SyncOnce>TRUE</SyncOnce>
 		<ModDate>20260827</ModDate>
 	</Esri>
-	<tool name="CreateCandidateEAs" displayname="Create Candidate EAs">
+	<tool name="CreateEAs" displayname="Create EAs">
 		<summary>Create complete, non-overlapping candidate enumeration areas from building points and dwelling counts.</summary>
 		<usage>The tool groups nearby buildings within each administrative unit, balances candidate workloads, and creates a complete polygon partition. Roads influence where polygon boundaries fall but do not act as absolute barriers. Outputs are review proposals and should be checked before operational use. Spatial Analyst is required for polygon allocation.</usage>
 		<parameters>

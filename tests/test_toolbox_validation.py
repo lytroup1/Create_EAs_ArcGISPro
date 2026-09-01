@@ -19,8 +19,8 @@ class FakeParameter:
 
 def _load_toolbox():
     sys.modules.setdefault("arcpy", types.ModuleType("arcpy"))
-    toolbox_path = Path(__file__).parents[1] / "toolbox" / "preea.pyt"
-    loader = importlib.machinery.SourceFileLoader("preea_toolbox_test", str(toolbox_path))
+    toolbox_path = Path(__file__).parents[1] / "toolbox" / "create_eas.pyt"
+    loader = importlib.machinery.SourceFileLoader("create_eas_toolbox_test", str(toolbox_path))
     spec = importlib.util.spec_from_loader(loader.name, loader)
     module = importlib.util.module_from_spec(spec)
     loader.exec_module(module)

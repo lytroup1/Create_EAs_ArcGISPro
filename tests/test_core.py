@@ -1,9 +1,9 @@
 import unittest
 
-from preea.constants import RejectionReason, ThresholdStatus
-from preea.models import Building, EATargets, Edge, ScoreWeights
-from preea.region_grow import grow_candidate_eas
-from preea.scoring import evaluate_merge, threshold_status
+from create_eas.constants import RejectionReason, ThresholdStatus
+from create_eas.models import Building, EATargets, Edge, ScoreWeights
+from create_eas.region_grow import grow_candidate_eas
+from create_eas.scoring import evaluate_merge, threshold_status
 
 
 class CoreTests(unittest.TestCase):

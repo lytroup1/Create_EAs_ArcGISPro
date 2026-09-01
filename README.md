@@ -1,4 +1,4 @@
-# PreEA ArcGIS Pro Prototype
+# Create EAs ArcGIS Pro Tool
 
 This project generates candidate census Enumeration Areas from building points and dwelling counts. Candidate EAs are review proposals for a future official geography; the tool never overwrites official boundaries.
 
@@ -16,9 +16,9 @@ This annotated example shows residences as magenta symbols, candidate EA boundar
 
 ## ArcGIS Pro toolbox
 
-The final `.pyt` file is uploaded directly into ArcGIS Pro and runs inside the ArcGIS Pro Python environment. It will import the reusable logic from `src/preea`; there is no separate application connection or service. ArcPy is provided by ArcGIS Pro and is intentionally not listed as a pip dependency. Polygon partitioning requires the ArcGIS Spatial Analyst extension.
+The final `.pyt` file is uploaded directly into ArcGIS Pro and runs inside the ArcGIS Pro Python environment. It imports the reusable logic from `src/create_eas`; there is no separate application connection or service. ArcPy is provided by ArcGIS Pro and is intentionally not listed as a pip dependency. Polygon partitioning requires the ArcGIS Spatial Analyst extension.
 
-See the [Create Candidate EAs tool reference](docs/create_candidate_eas.md) for usage, parameters, output fields, environments, licensing, and a Python example.
+See the [Create EAs tool reference](docs/create_eas.md) for usage, parameters, output fields, environments, licensing, and a Python example.
 
 Run tests from an ArcGIS Pro Python Command Prompt or another Python environment with the source directory available:
 

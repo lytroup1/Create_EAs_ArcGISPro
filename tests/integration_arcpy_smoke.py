@@ -10,11 +10,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import arcpy
 
-from preea.arcpy_workflow import run_candidate_eas
+from create_eas.arcpy_workflow import run_candidate_eas
 
 
 def main():
-    root = tempfile.mkdtemp(prefix="preea_smoke_")
+    root = tempfile.mkdtemp(prefix="create_eas_smoke_")
     try:
         geodatabase = arcpy.management.CreateFileGDB(root, "smoke.gdb")[0]
         spatial_reference = arcpy.SpatialReference(3857)
